@@ -1,0 +1,13 @@
+{
+  "labelMapping": {"J": 0, "E": 1, "C": 2},
+  "pathToDataFileDocuments" : "./dataFiles/documents.json",
+  "pathToFolderOfTextFiles": "C:/Users/CharlesCOUSYN/OneDrive - yncréa/Projet plaintes/Plaintes ML txt",
+  "pathToLabelFile": "C:/Users/CharlesCOUSYN/OneDrive - yncréa/Projet plaintes/Complaints-END-with-web-site-OriginalCSV.csv",
+  "sequenceSizePerDocument": 250,
+  "embeddingSize": 32,
+  "epochs": 1,
+  "batchSize": 10,
+  "validationSplit": 0.3,
+  "learningRate": 0.1,
+  "modelSaveDir": "./modelSave"
+}

@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node -r esm main.js"
+    "start": "node -r esm main.js",
+    "stats": "node -r esm dataUtils.js"
   },
   "keywords": [],
   "author": {
@@ -16,6 +17,7 @@
   "repository": "github:CharlesCousyn/LSTMProj",
   "dependencies": {
     "@tensorflow/tfjs-node-gpu": "1.5.1",
+    "csv-file-to-json": "^4.0.3",
     "esm": "^3.2.25",
     "rxjs": "^6.5.4"
   }

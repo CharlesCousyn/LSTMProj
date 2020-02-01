@@ -79,8 +79,4 @@ build/Release
 /node_modules/*
 
 # Models files
-/models/*
-
-# data folders
-/data/*
-/resultFiles/*
+/modelsSave/*
