@@ -5,39 +5,58 @@ import * as DATASET_INIT from "./datasetInit";
 import * as tensorflow from "@tensorflow/tfjs-node-gpu"
 import {jsonDocumentsToTensors, myTokenizer} from "./dataUtils";
 
-function buildModel(maxLen, vocabularySize, embeddingSize, numClasses)
+function buildModel(maxLen, vocabularySize, embeddingSize, numClasses, seed, numberLSTMCells)
 {
+	console.log("maxLen", maxLen);
+	console.log("vocabularySize", vocabularySize);
+	console.log("embeddingSize", embeddingSize);
+	console.log("numClasses", numClasses);
 	const model = tensorflow.sequential();
 
-	model.add(tensorflow.layers.embedding(
+	const embeddingLayer = tensorflow.layers.embedding(
 		{
 			inputDim: vocabularySize,
-			outputDim: embeddingSize,//embeddingSize = 32
-			inputLength: maxLen//maxLen = 250
-		}));
+			outputDim: embeddingSize,
+			inputLength: maxLen,
+			embeddingsInitializer: tensorflow.initializers.glorotNormal(seed)
+		});
+	const lstmLayer = tensorflow.layers.bidirectional({layer: tensorflow.layers.lstm({units: numberLSTMCells, returnSequences: false, recurrentInitializer: 'glorotNormal', unitForgetBias: true}), mergeMode: 'concat'});
+	const outputLayer = tensorflow.layers.dense(
+		{
+			units: numClasses,
+			activation: 'softmax',
+			kernelInitializer: tensorflow.initializers.glorotNormal(seed),
+			biasInitializer: tensorflow.initializers.glorotNormal(seed),
+			useBias: true
+		});
 
-	model.add(tensorflow.layers.lstm({units: maxLen, returnSequences: false, recurrentInitializer: 'glorotNormal'}));
+	model.add(embeddingLayer);
+	model.add(lstmLayer);
+	model.add(outputLayer);
 
-	/*const dense = tensorflow.layers.dense({units: numClasses});
-	model.add(tensorflow.layers.timeDistributed({layer: dense}));
-	model.add(tensorflow.layers.activation({activation: 'softmax'}));*/
-	model.add(tensorflow.layers.dense({units: numClasses, activation: 'softmax'}));//numClasses = 3
+	console.log(embeddingLayer.batchInputShape);
+	console.log(embeddingLayer.outputShape);
+	console.log(lstmLayer.batchInputShape);
+	console.log(lstmLayer.outputShape);
+	console.log(outputLayer.batchInputShape);
+	console.log(outputLayer.outputShape);
 
 	model.summary();
 	return model;
 }
 
-async function trainModel(model, data, labels, epochs, batchSize, validationSplit, modelSaveDir)
+async function trainModel(model, dataTrain, labelsTrain, dataTest, labelsTest, epochs, batchSize, modelSaveDir, classWeight)
 {
 	console.log('Training model...');
-	const history = await model.fit(data, labels, {
+	const history = await model.fit(dataTrain, labelsTrain, {
 		epochs: epochs,
 		batchSize: batchSize,
-		validationSplit: validationSplit,
+		validationData:[dataTest, labelsTest],
 		callbacks: () =>
 		{
 			console.log("Coucou");
-		}
+		},
+		classWeight: classWeight
 	});
 	console.log(history);
 
@@ -61,24 +80,26 @@ async function trainModel(model, data, labels, epochs, batchSize, validationSpli
 		GENERAL_CONFIG.labelMapping);
 
 	//const {dataTensorsTrain, dataTensorsTest,  labelTensorsTrain, labelTensorsTest} = jsonDocumentsToTensors(documents, GENERAL_CONFIG.sequenceSizePerDocument);
-	const {dataTensors, labelTensors} = jsonDocumentsToTensors(documents, GENERAL_CONFIG.sequenceSizePerDocument);
+	const {dataTensorsTrain, labelTensorsTrain, dataTensorsTest, labelTensorsTest} = jsonDocumentsToTensors(documents, GENERAL_CONFIG.sequenceSizePerDocument, GENERAL_CONFIG.validationSplit);
 
 
 	const model = buildModel(
 		GENERAL_CONFIG.sequenceSizePerDocument,
-		myTokenizer.wordCounts.length,
+		Object.keys(myTokenizer.wordCounts).length,
 		GENERAL_CONFIG.embeddingSize,
-		Object.keys(GENERAL_CONFIG.labelMapping).length);
+		Object.keys(GENERAL_CONFIG.labelMapping).length,
+		GENERAL_CONFIG.seed,
+		GENERAL_CONFIG.numberLSTMCells);
 
 	model.compile({
 		loss: 'categoricalCrossentropy',
-		optimizer: tensorflow.train.rmsprop(GENERAL_CONFIG.learningRate),
+		optimizer: tensorflow.train.adam(GENERAL_CONFIG.learningRate),
 		metrics: ["accuracy"]
 	});
 
-	await trainModel(model, dataTensors, labelTensors,
+	await trainModel(model, dataTensorsTrain, labelTensorsTrain, dataTensorsTest, labelTensorsTest,
 		GENERAL_CONFIG.epochs,
 		GENERAL_CONFIG.batchSize,
-		GENERAL_CONFIG.validationSplit,
-		GENERAL_CONFIG.modelSaveDir);
+		GENERAL_CONFIG.modelSaveDir,
+		GENERAL_CONFIG.classWeight);
 })();

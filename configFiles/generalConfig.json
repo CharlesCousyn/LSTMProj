@@ -1,13 +1,16 @@
 {
   "labelMapping": {"J": 0, "E": 1, "C": 2},
+  "classWeight": [1.697, 1.0, 2.149],
   "pathToDataFileDocuments" : "./dataFiles/documents.json",
-  "pathToFolderOfTextFiles": "C:/Users/CharlesCOUSYN/OneDrive - yncréa/Projet plaintes/Plaintes ML txt",
-  "pathToLabelFile": "C:/Users/CharlesCOUSYN/OneDrive - yncréa/Projet plaintes/Complaints-END-with-web-site-OriginalCSV.csv",
+  "pathToFolderOfTextFiles": "C:/Users/Charles/OneDrive - yncréa/Projet plaintes/Plaintes ML txt",
+  "pathToLabelFile": "C:/Users/Charles/OneDrive - yncréa/Projet plaintes/Complaints-END-with-web-site-OriginalCSV.csv",
   "sequenceSizePerDocument": 250,
-  "embeddingSize": 32,
-  "epochs": 1,
+  "embeddingSize": 64,
+  "epochs": 20,
   "batchSize": 10,
+  "numberLSTMCells": 32,
   "validationSplit": 0.3,
-  "learningRate": 0.1,
-  "modelSaveDir": "./modelSave"
+  "learningRate": 0.0001,
+  "modelSaveDir": "./modelSave",
+  "seed": 468856
 }
