@@ -23,9 +23,7 @@ class Tokenizer {
 	fitOnTexts(texts) {
 		texts.forEach(text => {
 			text = this.cleanText(text);
-			text.forEach(word => {
-				this.wordCounts[word] = (this.wordCounts[word] || 0) + 1;
-			});
+			text.forEach(word => {this.wordCounts[word] = (this.wordCounts[word] || 0) + 1;});
 		});
 
 		Object.entries(this.wordCounts)
