@@ -61,7 +61,7 @@ async function trainModel(model, dataTrain, labelsTrain, dataTest, labelsTest, e
 	console.log(history);
 
 	console.log('Evaluating model...');
-	const [testLoss, testAcc] = model.evaluate(data, labels, {batchSize: 100});
+	const [testLoss, testAcc] = model.evaluate(dataTest, labelsTest, {batchSize: 100});
 	console.log(`Evaluation loss: ${(await testLoss.data())[0].toFixed(4)}`);
 	console.log(`Evaluation accuracy: ${(await testAcc.data())[0].toFixed(4)}`);
 

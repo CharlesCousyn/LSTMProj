@@ -1,8 +1,11 @@
 import tokenizer from "./tokenizer.js"
 import * as tensorflow from "@tensorflow/tfjs-node-gpu"
 import readline from 'readline'
+import GENERAL_CONFIG from "./configFiles/generalConfig";
+import seedRandom from"seedrandom"
 
 export let myTokenizer = null;
+const generator = seedRandom(GENERAL_CONFIG.seed);
 
 function initTokenizer(documents)
 {
@@ -48,7 +51,7 @@ function shuffleTwoArrays(array1, array2)
 {
 	for(let i = array1.length - 1; i > 0; i--)
 	{
-		const j = Math.floor(Math.random() * i);
+		const j = Math.floor(generator() * i);
 
 		const temp1 = array1[i];
 		array1[i] = array1[j];

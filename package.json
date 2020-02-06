@@ -19,6 +19,7 @@
     "@tensorflow/tfjs-node-gpu": "1.5.1",
     "csv-file-to-json": "^4.0.3",
     "esm": "^3.2.25",
-    "rxjs": "^6.5.4"
+    "rxjs": "^6.5.4",
+    "seedrandom": "^3.0.5"
   }
 }
