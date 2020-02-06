@@ -33,10 +33,10 @@ export function jsonDocumentsToTensors(documents, sequenceSizePerDocument, valid
 
 	//Split train and test dataset
 	const indexOfSplit = Math.round(validationSplit * wordVectorsOriginal.length);
-	const wordVectorsOriginalTrain = wordVectorsOriginal.slice(0, indexOfSplit);
-	const wordVectorsOriginalTest = wordVectorsOriginal.slice(indexOfSplit, wordVectorsOriginal.length);
-	const labelsTrain = labels.slice(0, indexOfSplit);
-	const labelsTest = labels.slice(indexOfSplit, labels.length);
+	const wordVectorsOriginalTest = wordVectorsOriginal.slice(0, indexOfSplit);
+	const wordVectorsOriginalTrain = wordVectorsOriginal.slice(indexOfSplit, wordVectorsOriginal.length);
+	const labelsTest = labels.slice(0, indexOfSplit);
+	const labelsTrain = labels.slice(indexOfSplit, labels.length);
 
 	//Create tensors
 	const dataTensorsTrain = tensorflow.tensor2d(wordVectorsOriginalTrain);
