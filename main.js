@@ -20,7 +20,9 @@ function buildModel(maxLen, vocabularySize, embeddingSize, numClasses, seed, num
 			inputLength: maxLen,
 			embeddingsInitializer: tensorflow.initializers.glorotNormal(seed)
 		});
-	const lstmLayer = tensorflow.layers.bidirectional({layer: tensorflow.layers.lstm({units: numberLSTMCells, returnSequences: false, recurrentInitializer: 'glorotNormal', unitForgetBias: true}), mergeMode: 'concat'});
+
+	const lstmLayer = tensorflow.layers.bidirectional({layer: tensorflow.layers.lstm({units: numberLSTMCells, returnSequences: true, recurrentInitializer: 'glorotNormal', unitForgetBias: true}), mergeMode: 'concat'});
+	const lstmLayer2 = tensorflow.layers.bidirectional({layer: tensorflow.layers.lstm({units: numberLSTMCells, returnSequences: false, recurrentInitializer: 'glorotNormal', unitForgetBias: true}), mergeMode: 'concat'});
 	const outputLayer = tensorflow.layers.dense(
 		{
 			units: numClasses,
@@ -32,39 +34,52 @@ function buildModel(maxLen, vocabularySize, embeddingSize, numClasses, seed, num
 
 	model.add(embeddingLayer);
 	model.add(lstmLayer);
+	model.add(lstmLayer2);
 	model.add(outputLayer);
-
-	console.log(embeddingLayer.batchInputShape);
-	console.log(embeddingLayer.outputShape);
-	console.log(lstmLayer.batchInputShape);
-	console.log(lstmLayer.outputShape);
-	console.log(outputLayer.batchInputShape);
-	console.log(outputLayer.outputShape);
 
 	model.summary();
 	return model;
 }
 
-async function trainModel(model, dataTrain, labelsTrain, dataTest, labelsTest, epochs, batchSize, modelSaveDir, classWeight)
+async function trainModel(model, dataTrain, labelsTrain, dataTest, labelsTest, epochs, batchSize, classWeight)
 {
 	console.log('Training model...');
 	const history = await model.fit(dataTrain, labelsTrain, {
 		epochs: epochs,
 		batchSize: batchSize,
 		validationData:[dataTest, labelsTest],
-		callbacks: () =>
-		{
-			console.log("Coucou");
-		},
+		callbacks:
+			{
+				onEpochEnd: async(epoch, logs) =>
+				{
+					const dir = `./modelSave${epoch}`;
+					if (!filesSystem.existsSync(dir))
+					{
+						filesSystem.mkdirSync(dir);
+					}
+
+					await saveModel(model, dir);
+				}
+			},
 		classWeight: classWeight
 	});
 	console.log(history);
 
+	//Free Memory
+	tensorflow.dispose([dataTrain, labelsTrain]);
+
 	console.log('Evaluating model...');
 	const [testLoss, testAcc] = model.evaluate(dataTest, labelsTest, {batchSize: 100});
+
+	//Free Memory
+	tensorflow.dispose([dataTest, labelsTest]);
+
 	console.log(`Evaluation loss: ${(await testLoss.data())[0].toFixed(4)}`);
 	console.log(`Evaluation accuracy: ${(await testAcc.data())[0].toFixed(4)}`);
+}
 
+async function saveModel(model, modelSaveDir)
+{
 	// Save model artifacts.
 	await model.save(`file://${modelSaveDir}`);
 	console.log(`Saved model to ${modelSaveDir}`);
@@ -100,6 +115,7 @@ async function trainModel(model, dataTrain, labelsTrain, dataTest, labelsTest, e
 	await trainModel(model, dataTensorsTrain, labelTensorsTrain, dataTensorsTest, labelTensorsTest,
 		GENERAL_CONFIG.epochs,
 		GENERAL_CONFIG.batchSize,
-		GENERAL_CONFIG.modelSaveDir,
 		GENERAL_CONFIG.classWeight);
+
+	await saveModel(model, GENERAL_CONFIG.modelSaveDir);
 })();

@@ -16,35 +16,38 @@ function initTokenizer(documents)
 
 export function jsonDocumentsToTensors(documents, sequenceSizePerDocument, validationSplit)
 {
-	initTokenizer(documents);
+	return tensorflow.tidy(() =>
+	{
+		initTokenizer(documents);
 
-	let wordVectorsOriginal = myTokenizer.textsToSequences(documents.map(doc => doc.text));
-	let labels = documents.map(doc => doc.labelNN);
-	//labels = [labels[0], labels[1], labels[13]];
+		let wordVectorsOriginal = myTokenizer.textsToSequences(documents.map(doc => doc.text));
+		let labels = documents.map(doc => doc.labelNN);
+		//labels = [labels[0], labels[1], labels[13]];
 
-	console.log(getInstancesPerLabel(labels));
+		console.log(getInstancesPerLabel(labels));
 
-	//Keeping maxWordsPerDocument elements per document and adding 0 when too short
-	wordVectorsOriginal = padSequences(wordVectorsOriginal, sequenceSizePerDocument, "post", "pre", 0);
-	//wordVectorsOriginal = [wordVectorsOriginal[0], wordVectorsOriginal[1], wordVectorsOriginal[13]];
+		//Keeping maxWordsPerDocument elements per document and adding 0 when too short
+		wordVectorsOriginal = padSequences(wordVectorsOriginal, sequenceSizePerDocument, "post", "pre", 0);
+		//wordVectorsOriginal = [wordVectorsOriginal[0], wordVectorsOriginal[1], wordVectorsOriginal[13]];
 
-	//Shuffle data and labels
-	[wordVectorsOriginal, labels] = shuffleTwoArrays(wordVectorsOriginal, labels);
+		//Shuffle data and labels
+		[wordVectorsOriginal, labels] = shuffleTwoArrays(wordVectorsOriginal, labels);
 
-	//Split train and test dataset
-	const indexOfSplit = Math.round(validationSplit * wordVectorsOriginal.length);
-	const wordVectorsOriginalTest = wordVectorsOriginal.slice(0, indexOfSplit);
-	const wordVectorsOriginalTrain = wordVectorsOriginal.slice(indexOfSplit, wordVectorsOriginal.length);
-	const labelsTest = labels.slice(0, indexOfSplit);
-	const labelsTrain = labels.slice(indexOfSplit, labels.length);
+		//Split train and test dataset
+		const indexOfSplit = Math.round(validationSplit * wordVectorsOriginal.length);
+		const wordVectorsOriginalTest = wordVectorsOriginal.slice(0, indexOfSplit);
+		const wordVectorsOriginalTrain = wordVectorsOriginal.slice(indexOfSplit, wordVectorsOriginal.length);
+		const labelsTest = labels.slice(0, indexOfSplit);
+		const labelsTrain = labels.slice(indexOfSplit, labels.length);
 
-	//Create tensors
-	const dataTensorsTrain = tensorflow.tensor2d(wordVectorsOriginalTrain);
-	const dataTensorsTest = tensorflow.tensor2d(wordVectorsOriginalTest);
-	const labelTensorsTrain = tensorflow.tensor2d(labelsTrain);
-	const labelTensorsTest = tensorflow.tensor2d(labelsTest);
-	console.log("dataTensorsTrain.shape", dataTensorsTrain.shape, "labelTensorsTrain.shape", labelTensorsTrain.shape, "dataTensorsTest.shape", dataTensorsTest.shape, "labelTensorsTest.shape", labelTensorsTest.shape);
-	return {dataTensorsTrain, labelTensorsTrain, dataTensorsTest, labelTensorsTest};
+		//Create tensors
+		const dataTensorsTrain = tensorflow.tensor2d(wordVectorsOriginalTrain);
+		const dataTensorsTest = tensorflow.tensor2d(wordVectorsOriginalTest);
+		const labelTensorsTrain = tensorflow.tensor2d(labelsTrain);
+		const labelTensorsTest = tensorflow.tensor2d(labelsTest);
+		console.log("dataTensorsTrain.shape", dataTensorsTrain.shape, "labelTensorsTrain.shape", labelTensorsTrain.shape, "dataTensorsTest.shape", dataTensorsTest.shape, "labelTensorsTest.shape", labelTensorsTest.shape);
+		return {dataTensorsTrain, labelTensorsTrain, dataTensorsTest, labelTensorsTest};
+	});
 }
 
 function shuffleTwoArrays(array1, array2)

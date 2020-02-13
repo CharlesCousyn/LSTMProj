@@ -8,7 +8,7 @@
   "embeddingSize": 64,
   "epochs": 10,
   "batchSize": 10,
-  "numberLSTMCells": 16,
+  "numberLSTMCells": 4,
   "validationSplit": 0.3,
   "learningRate": 0.0001,
   "modelSaveDir": "./modelSave",

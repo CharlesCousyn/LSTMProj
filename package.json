@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node -r esm main.js",
-    "stats": "node -r esm dataUtils.js"
+    "stats": "node -r esm dataUtils.js",
+    "confusions": "node -r esm testModel.js"
   },
   "keywords": [],
   "author": {
@@ -19,6 +20,7 @@
     "@tensorflow/tfjs-node-gpu": "1.5.1",
     "csv-file-to-json": "^4.0.3",
     "esm": "^3.2.25",
+    "ml-confusion-matrix": "^0.4.0",
     "rxjs": "^6.5.4",
     "seedrandom": "^3.0.5"
   }
